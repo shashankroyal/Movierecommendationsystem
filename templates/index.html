@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        input {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .movie-title {
+            font-weight: bold;
+            font-size: 22px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        async function getRecommendations() {
+            let movieTitle = document.getElementById("movieInput").value;
+            if (!movieTitle) {
+                alert("Please enter a movie name.");
+                return;
+            }
+
+            let response = await fetch("/recommend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: movieTitle })
+            });
+
+            let result = await response.json();
+            let resultDiv = document.getElementById("results");
+            resultDiv.innerHTML = ""; // Clear previous results
+
+            if (result.error) {
+                resultDiv.innerHTML = `<p style="color:red;">${result.error}</p>`;
+                return;
+            }
+
+            resultDiv.innerHTML = `<div class="movie-title">Recommendations for: ${result.movie}</div><ul>`;
+            result.recommendations.forEach(movie => {
+                resultDiv.innerHTML += `<li>${movie.title} (Similarity: ${movie.score})</li>`;
+            });
+            resultDiv.innerHTML += `</ul>`;
+        }
+    </script>
+</head>
+<body>
+    <h1>Movie Recommendation System</h1>
+    <input type="text" id="movieInput" placeholder="Enter movie title" />
+    <button onclick="getRecommendations()">Get Recommendations</button>
+    <div id="results"></div>
+</body>
+</html>
